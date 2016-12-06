@@ -1,0 +1,45 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ObjectMover : MonoBehaviour
+{
+	[Header("Movement Properties")]
+	public bool ShouldMove = true;
+	public bool ShouldLoop = true;
+	public float Speed = 3.0f;
+	public float WaitTimeAtWaypoint = 1.0f;
+
+	[Header("Object Properties")]
+	public Rigidbody2D ObjectRigidbody2D;
+	public List<Transform> Waypoints = new List<Transform>();
+
+	[Header("Read-Only")]
+	[SerializeField]
+	private int _waypointIndex = 0;
+	[SerializeField]
+	private float _waitTimer = 0.0f;
+
+	void FixedUpdate()
+	{
+		if(ShouldMove && (_waitTimer < Time.time))
+		{
+			if (Vector3.Distance (ObjectRigidbody2D.position, Waypoints [_waypointIndex].position) <= Mathf.Epsilon)
+			{
+				_waypointIndex++;
+				_waitTimer = Time.time + WaitTimeAtWaypoint;
+			}
+
+			if (_waypointIndex >= Waypoints.Count)
+			{
+				if (ShouldLoop)
+					_waypointIndex = 0;
+				else
+					ShouldMove = false;
+			}
+				
+			Vector2 newPosition = Vector2.MoveTowards (ObjectRigidbody2D.position, Waypoints [_waypointIndex].position, Speed * Time.fixedDeltaTime);
+			ObjectRigidbody2D.MovePosition (newPosition);
+		}
+	}
+}
