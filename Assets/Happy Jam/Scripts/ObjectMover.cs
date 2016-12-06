@@ -9,6 +9,7 @@ public class ObjectMover : MonoBehaviour
 	public bool ShouldLoop = true;
 	public float Speed = 3.0f;
 	public float WaitTimeAtWaypoint = 1.0f;
+	public float MaxDistanceDelta = Mathf.Epsilon;
 
 	[Header("Object Properties")]
 	public Rigidbody2D ObjectRigidbody2D;
@@ -24,7 +25,7 @@ public class ObjectMover : MonoBehaviour
 	{
 		if(ShouldMove && (_waitTimer < Time.time))
 		{
-			if (Vector3.Distance (ObjectRigidbody2D.position, Waypoints [_waypointIndex].position) <= Mathf.Epsilon)
+			if (Vector3.Distance (ObjectRigidbody2D.position, Waypoints [_waypointIndex].position) <= MaxDistanceDelta)
 			{
 				_waypointIndex++;
 				_waitTimer = Time.time + WaitTimeAtWaypoint;
