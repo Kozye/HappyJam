@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using Happy;
+
 public class ObjectMover : MonoBehaviour
 {
 	[Header("Movement Properties")]
@@ -42,5 +44,10 @@ public class ObjectMover : MonoBehaviour
 			Vector2 newPosition = Vector2.MoveTowards (ObjectRigidbody2D.position, Waypoints [_waypointIndex].position, Speed * Time.fixedDeltaTime);
 			ObjectRigidbody2D.MovePosition (newPosition);
 		}
+	}
+
+	void OnDrawGizmos ()
+	{
+		GizmosExtension.DrawLine (ObjectRigidbody2D.position, Waypoints[_waypointIndex].position, Color.grey);
 	}
 }

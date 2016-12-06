@@ -6,5 +6,5 @@ using Happy;
 
 public class GameManager : MonoSingleton<GameManager>
 {
-	
+
 }
