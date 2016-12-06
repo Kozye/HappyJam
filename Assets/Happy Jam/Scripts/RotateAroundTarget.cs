@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using Happy;
+
 public class RotateAroundTarget : MonoBehaviour
 {
 	public Transform Target;
@@ -24,5 +26,10 @@ public class RotateAroundTarget : MonoBehaviour
 	void Update ()
 	{
 		_transform.RotateAround (Target.position, RotationAxis, RotationAngle * Time.deltaTime);
+	}
+
+	void OnDrawGizmos()
+	{
+		GizmosExtension.DrawCircle (Target.position, Vector3.Distance (Target.position, transform.position), Color.gray);
 	}
 }
