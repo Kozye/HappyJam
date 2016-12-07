@@ -6,7 +6,7 @@ using UnityEngine;
 [RequireComponent (typeof(Rigidbody2D))]
 public class TopDownPlayerMovementController : MonoBehaviour
 {
-	[Header ("InputAxis Properties")]
+	[Header ("Input Axis Properties")]
 	public string HorizontalAxisName = "Horizontal";
 	public string VerticalAxisName = "Vertical";
 
