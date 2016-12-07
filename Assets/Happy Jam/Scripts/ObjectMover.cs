@@ -26,7 +26,15 @@ public class ObjectMover : MonoBehaviour
 	void FixedUpdate()
 	{
 		if(ShouldMove && (_waitTimer < Time.time))
+			Move ();
+	}
+
+	private void Move()
+	{
+		if(Waypoints.Count != 0)
 		{
+			ObjectRigidbody2D.position = Vector2.MoveTowards (ObjectRigidbody2D.position, Waypoints [_waypointIndex].position, Speed * Time.fixedDeltaTime);
+
 			if (Vector3.Distance (ObjectRigidbody2D.position, Waypoints [_waypointIndex].position) <= MaxDistanceDelta)
 			{
 				_waypointIndex++;
@@ -40,9 +48,10 @@ public class ObjectMover : MonoBehaviour
 				else
 					ShouldMove = false;
 			}
-				
-			Vector2 newPosition = Vector2.MoveTowards (ObjectRigidbody2D.position, Waypoints [_waypointIndex].position, Speed * Time.fixedDeltaTime);
-			ObjectRigidbody2D.MovePosition (newPosition);
+		}
+		else
+		{
+			Debug.LogWarning("There are no Waypoint references set.");
 		}
 	}
 
