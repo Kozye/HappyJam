@@ -11,6 +11,7 @@ using System;
 
 namespace Happy
 {
+	[DisallowMultipleComponent]
 	public class FPSDisplay : MonoSingleton<FPSDisplay>
 	{
 		[Serializable]

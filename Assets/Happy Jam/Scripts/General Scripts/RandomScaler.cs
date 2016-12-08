@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
+[DisallowMultipleComponent]
 public class RandomScaler : MonoBehaviour
 {
 	[Header("Relative Scale Values")]

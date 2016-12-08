@@ -4,6 +4,7 @@ using UnityEngine;
 
 using Happy;
 
+[DisallowMultipleComponent]
 public class RotateAroundTarget : MonoBehaviour
 {
 	public Transform Target;

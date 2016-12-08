@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DontDestroyOnLoad : MonoBehaviour
+namespace Happy
 {
-	void Awake()
+	[DisallowMultipleComponent]
+	public class DontDestroyOnLoad : MonoBehaviour
 	{
-		DontDestroyOnLoad (gameObject);
+		void Awake ()
+		{
+			DontDestroyOnLoad (gameObject);
+		}
 	}
 }
