@@ -32,7 +32,7 @@ public class Entity : MonoBehaviour
 		CurrentHealth = InitialHealth;
 	}
 
-	private void Die ()
+	public void Die ()
 	{
 		Debug.Log (gameObject.name + " died.");
 
