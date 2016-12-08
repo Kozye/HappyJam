@@ -6,9 +6,9 @@ using AI;
 namespace BBUnity.Actions
 {
 
-    [Action("Steering Behaviour/Flee")]
-    [Help("Steering Behaviour Flee that requires Agent component")]
-    public class Flee : BaseSteeringBehaviour
+    [Action("Steering Behaviour/Seek")]
+    [Help("Steering Behaviour Seek that requires Agent component")]
+    public class Seek : BaseSteeringBehaviour
     {
         [InParam("target")]
         [Help("Target position from which agent will flee")]
@@ -35,12 +35,11 @@ namespace BBUnity.Actions
             Steering steering = new Steering();
             if (agent is Agent2D)
             {
-                Debug.Log("2DAgent");
-                steering.linear = (Vector2)_transform.position - (Vector2)_target.position;
+                steering.linear = (Vector2)_target.position- (Vector2)_transform.position;
             }
             else
             {
-                steering.linear = _transform.position - _target.position;
+                steering.linear = _target.position -  _transform.position;
             }
             steering.linear.Normalize();
             steering.linear = steering.linear * agent.GetMaxAccel();

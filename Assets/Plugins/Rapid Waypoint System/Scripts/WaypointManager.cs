@@ -173,6 +173,12 @@ public class WaypointManager : MonoBehaviour
         return (Vector3.Distance(obj.transform.position, obj.currentNodeTarget) < nodeProximityDistance);
     }
 
+    // For Behaviour
+    public bool ObjectIsOnNode(Transform obj, Vector3 currentNodeTarget)
+    {
+        return (Vector3.Distance(obj.transform.position, currentNodeTarget) < nodeProximityDistance);
+    }
+
     // Remove an entity from the list
     public void RemoveEntity(WaypointAgent entity)
     {

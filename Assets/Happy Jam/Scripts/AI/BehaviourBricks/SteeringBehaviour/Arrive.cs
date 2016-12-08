@@ -21,10 +21,12 @@ namespace BBUnity.Actions
         public float timeToTarget = 0.1f;
 
         private bool isClose = false;
+        private Transform _transform;
 
         public override void OnStart()
         {
             base.OnStart();
+            _transform = gameObject.transform;
         }
 
         public override TaskStatus OnUpdate()
@@ -45,7 +47,7 @@ namespace BBUnity.Actions
         {
             isClose = false;
             Steering steering = new Steering();
-            Vector3 direction = target.transform.position - agent.GetTransform().position;
+            Vector3 direction = target.transform.position - _transform.position;
             float distance = direction.magnitude;
             float targetSpeed;
             if (distance < targetRadius)

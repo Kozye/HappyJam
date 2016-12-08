@@ -20,6 +20,8 @@ namespace AI
         [Header("Used externaly")]
         public float MaxRotation;
         public float MaxAngularAccel;
+        [Tooltip("Higer value better precision. Good Precision = 50")]
+        public float RectionTime = 2;
 
         [Header("Read Only")]
         public Vector3 velocity;
@@ -39,9 +41,9 @@ namespace AI
         }
         public virtual void Update()
         {
-            Vector3 displacement = velocity * Time.deltaTime;
+            Vector3 displacement = velocity * Time.deltaTime ;
 
-            orientation += rotation * Time.deltaTime;
+            orientation += rotation * Time.deltaTime ;
             if (orientation < 0.0f)
                 orientation += 360.0f;
             else if (orientation > 360.0f)
@@ -59,8 +61,8 @@ namespace AI
                 groups.Clear();
             }
 
-            velocity += steering.linear * Time.deltaTime;
-            rotation += steering.angular * Time.deltaTime;
+            velocity += steering.linear * Time.deltaTime* RectionTime;
+            rotation += steering.angular * Time.deltaTime * RectionTime;
 
             if (velocity.magnitude > MaxSpeed)
             {
