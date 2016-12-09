@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace Happy
 {
+	[DisallowMultipleComponent]
 	public class TimedObjectDestructor : MonoBehaviour
 	{
 		[SerializeField]

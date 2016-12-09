@@ -11,6 +11,7 @@ using System;
 
 namespace Happy
 {
+	[DisallowMultipleComponent]
 	public class FPSDisplay : MonoSingleton<FPSDisplay>
 	{
 		[Serializable]
@@ -59,8 +60,6 @@ namespace Happy
 		{
 			if (Instance != this)
 				Destroy (gameObject);
-
-			DontDestroyOnLoad (gameObject);
 		}
 
 		void Update ()
