@@ -33,9 +33,9 @@ namespace BBUnity.Actions
             SetSteering();
             return TaskStatus.RUNNING;
         }
-        public Bounds GetBounds()
+        public UnityEngine.Bounds GetBounds()
         {
-            Bounds bounds = new Bounds();
+            UnityEngine.Bounds bounds = new UnityEngine.Bounds();
             Collider col = gameObject.GetComponent<Collider>();
             if (col != null)
             {   //Case 3D

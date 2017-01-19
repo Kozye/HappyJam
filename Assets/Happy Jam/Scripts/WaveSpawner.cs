@@ -1,12 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Happy;
 using UnityEngine.Events;
 using System;
+using Happy;
 
 [Serializable]
 public class CountStringEvent : UnityEvent<string> { }
-public class WaveSpawner : MonoSingleton<WaveSpawner>
+public class WaveSpawner : MonoBehaviour
 {
     const float ENEMY_SEARCH_TIME_FREQUENCY = 1f;
 
@@ -21,6 +21,9 @@ public class WaveSpawner : MonoSingleton<WaveSpawner>
     public Wave[] Waves;
     public float TimeBetweenWaves = 5f;
     public bool LoopAfterComplete = false;
+    public bool ClearWaveBeforeNext = false;
+    public bool CheckSpawnOverlap = true;
+    public bool SetEnemyRotationOnSpawn = true;
 
     [Header("ReadOnly")]
     [SerializeField]
@@ -36,14 +39,14 @@ public class WaveSpawner : MonoSingleton<WaveSpawner>
     public CustomUnityEvent OnWavesCompleted = new CustomUnityEvent();
     public CustomUnityEvent OnWaveCompleted = new CustomUnityEvent();
 
-    private int _nextWave = 0;
+    private int _nextWave = -1;
     private float _searchCountdown = ENEMY_SEARCH_TIME_FREQUENCY;
     private Transform _transform;
 
     [Header("Testing")]
     public int RemainingEnemies = 1;
     public bool StartOnStart = false;
-    
+
     void Awake()
     {
         __WaveCountDown = TimeBetweenWaves;
@@ -57,7 +60,7 @@ public class WaveSpawner : MonoSingleton<WaveSpawner>
     {
         if (_State == SpawnState.Waiting)
         {
-            if (!IsEnemyAlive())
+            if (!ClearWaveBeforeNext || !IsEnemyAlive())
             {
                 WaveCompleted();
             }
@@ -79,7 +82,6 @@ public class WaveSpawner : MonoSingleton<WaveSpawner>
         }
     }
 
-
     IEnumerator SpawnWave(Wave wave)
     {
         _State = SpawnState.Spawning;
@@ -92,16 +94,24 @@ public class WaveSpawner : MonoSingleton<WaveSpawner>
         yield break;
     }
 
-    //TODO: Fix enemyScript.SetTarget(tempTarget);
     void SpawnEnemy(WaveEnemy waveEnemy)
     {
         Debug.Log("Spawning Enemy " + waveEnemy.enemy.name);
-        Transform spawnTransform = waveEnemy.GetRandomSpawn();
+        Transform spawnTransform = waveEnemy.GetSpawn(CheckSpawnOverlap);
 
         if (spawnTransform == null)
-            spawnTransform = _transform;
+        {
+            Debug.LogWarning("Spawn transform is null. It may overlap with other physical gameobject");
+            return;
+            //spawnTransform = _transform;
+        }
 
         Transform enemy = Instantiate(waveEnemy.enemy, spawnTransform.position, spawnTransform.rotation) as Transform;
+        if (SetEnemyRotationOnSpawn)
+        {
+            SetTargetOrientation(GetTarget(), enemy);
+
+        }
     }
     void WaveCompleted()
     {
@@ -128,7 +138,30 @@ public class WaveSpawner : MonoSingleton<WaveSpawner>
             _State = SpawnState.Counting;
         }
     }
-    
+
+    // Enemy must have Agent component
+    void SetTargetOrientation(GameObject target, Transform enemy)
+    {
+        // Calculating rotation
+        float targetOrientation = 0;
+        if (target)
+        {
+            Vector3 direction = target.transform.position - enemy.position;
+            targetOrientation = Mathf.Atan2(direction.y, direction.x);
+            targetOrientation *= Mathf.Rad2Deg;
+
+            AI.Agent2D agent = enemy.GetComponent<AI.Agent2D>();
+            if (agent)
+                agent.rotation = targetOrientation;
+            else
+                enemy.transform.eulerAngles = new Vector3(0, 0, targetOrientation);
+        }
+    }
+    GameObject GetTarget()
+    {
+        // TODO GameManager.Instance.GetPlayer(spawnTransform.position);
+        return null;
+    }
     bool IsEnemyAlive()
     {
         bool alive = true;
@@ -143,9 +176,9 @@ public class WaveSpawner : MonoSingleton<WaveSpawner>
         return alive;
     }
 
-    // TODO REPLACE
     public int GetCurrentEnemiesCount()
     {
+        // TODO REPLACE
         return RemainingEnemies;
         //GameManager.Instance.Enemies.Length
     }
@@ -170,16 +203,36 @@ public class WaveSpawner : MonoSingleton<WaveSpawner>
         public WaveEnemy[] enemies;
         [Tooltip("Number of enemies to spawn")]
         public int count;
+        public bool spawnRandom = false;
         public float delay;
 
         public WaveEnemy GetWaveEnemy()
         {
-            int random = UnityEngine.Random.Range(0, 100);
             WaveEnemy enemy = null;
-            if (enemies != null && enemies.Length > 0)
+            if (!spawnRandom)
             {
-                enemy = enemies[random % enemies.Length];
+                int maxDiff = -1;
+                // Get enemy with less spawns
+                foreach (WaveEnemy e in enemies)
+                {
+                    if (e.Count - e.counter > maxDiff)
+                    {
+                        maxDiff = e.Count - e.counter;
+                        enemy = e;
+                    }
+                }
             }
+            // Get random enemy
+            if (spawnRandom || enemy == null)
+            {
+                int random = UnityEngine.Random.Range(0, 100);
+                if (enemies != null && enemies.Length > 0)
+                {
+                    enemy = enemies[random % enemies.Length];
+                }
+            }
+            if (enemy != null)
+                enemy.counter++;
             return enemy;
         }
     }
@@ -189,15 +242,47 @@ public class WaveSpawner : MonoSingleton<WaveSpawner>
     {
         public Transform enemy;
         public Transform[] spawns;
+        public int Count;
+        [HideInInspector]
+        public int counter = 0;
 
-        public Transform GetRandomSpawn()
+        public Transform GetSpawn(bool checkOverlap)
         {
             Transform transf = null;
             if (spawns != null && spawns.Length > 0)
             {
-                transf = spawns[UnityEngine.Random.Range(0, spawns.Length)];
+                transf = GetRandomSpawn();
+                if (IsOverlaping(transf))
+                {
+                    transf = null;
+                    foreach (Transform t in spawns)
+                    {
+                        if (!IsOverlaping(t))
+                        {
+                            transf = t;
+                            break;
+                        }
+                    }
+                }
             }
             return transf;
+        }
+
+        public Transform GetRandomSpawn()
+        {
+            return spawns[UnityEngine.Random.Range(0, spawns.Length)];
+        }
+        public bool IsOverlaping(Transform pos)
+        {
+            float radius = 1f;
+            RaycastHit2D hit = Physics2D.CircleCast(pos.position, radius, Vector2.zero);
+            if (hit)
+            {
+                Debug.Log("OVERLAPING " + hit.collider);
+                //if(hit.collider.tag)
+                return true;
+            }
+            return false;
         }
     }
 }

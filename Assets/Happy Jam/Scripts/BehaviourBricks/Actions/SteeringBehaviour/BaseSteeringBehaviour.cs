@@ -14,10 +14,12 @@ namespace BBUnity.Actions
         [Help("Used if Agent with multiple behavioursis using Weight. Default is 1")]
         public float weight = 1;
         protected IAgent agent;
+        protected Transform _transform;
 
         public override void OnStart()
         {
             agent = gameObject.GetComponent<IAgent>();
+            _transform = gameObject.transform;
             if (agent == null)
             {
                 Debug.LogWarning("The " + gameObject.name + " game object does not have a Agent component to navigate. One with default values has been added", gameObject);

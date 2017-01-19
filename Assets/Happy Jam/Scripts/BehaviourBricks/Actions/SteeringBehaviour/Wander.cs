@@ -5,9 +5,8 @@ using AI;
 
 namespace BBUnity.Actions
 {
-
     [Action("Steering Behaviour/Wander")]
-    [Help("Steering Behaviour Wander")]
+    [Help("Steering Behaviour Wander. Target Should be null")]
     public class Wander : Face
     {
         [InParam("offset")]
@@ -18,27 +17,16 @@ namespace BBUnity.Actions
         public float rate;
 
         private bool _initialized = false;
-        private Transform _transform;
 
         public override void OnStart()
         {
-            InitializeWander();
-        }
-        protected void InitializeWander()
-        {
-            if (!_initialized)
+            base.OnStart();
+            if (gameObject && !target)
             {
-                GameObject go = new GameObject();
-                target = go.transform;
-                _transform = gameObject.transform;
+                target = new GameObject();
                 target.transform.position = _transform.position;
-                base.Initialize();
-                agent = gameObject.GetComponent<IAgent>();
             }
-            _initialized = true;
-            Debug.Log("target" + target);
         }
-
         public override TaskStatus OnUpdate()
         {
             SetSteering();
@@ -50,12 +38,22 @@ namespace BBUnity.Actions
             Steering steering = new Steering();
             float wanderOrientation = Random.Range(-1.0f, 1.0f) * rate;
             float targetOrientation = wanderOrientation + agent.GetOrientation();
-            Vector3 orientationVec = AgentBehaviour.GetOriAsVec(agent.GetOrientation());
-            Vector3 targetPosition = (offset * orientationVec) + _transform.position;
-            targetPosition = targetPosition + (AgentBehaviour.GetOriAsVec(targetOrientation) * radius);
-            targetAux.transform.position = targetPosition;
+            if (agent is Agent2D)
+            {
+                Vector3 orientationVec = AI.AgentBehaviour.GetOriAsVec2D(agent.GetOrientation());
+                Vector3 targetPosition = (offset * orientationVec) + _transform.position;
+                targetPosition = targetPosition + (AI.AgentBehaviour.GetOriAsVec2D(targetOrientation) * radius);
+                target.transform.position = targetPosition;
+            }
+            else
+            {
+                Vector3 orientationVec = AI.AgentBehaviour.GetOriAsVec(agent.GetOrientation());
+                Vector3 targetPosition = (offset * orientationVec) + _transform.position;
+                targetPosition = targetPosition + (AI.AgentBehaviour.GetOriAsVec(targetOrientation) * radius);
+                target.transform.position = targetPosition;
+            }
             steering = base.GetSteering();
-            steering.linear = targetAux.transform.position - _transform.position;
+            steering.linear = target.transform.position - _transform.position;
             steering.linear.Normalize();
             steering.linear *= agent.GetMaxAccel();
             return steering;

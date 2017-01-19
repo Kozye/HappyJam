@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-
 namespace AI
 {
     /// <summary>
@@ -10,6 +9,7 @@ namespace AI
     /// </summary>
     public class Agent : MonoBehaviour, IAgent
     {
+        [Header("Agent Properties")]
         public float PriorityThreshold = 0.2f;
         public float MaxSpeed = 1;
         public float MaxAccel = 1;
@@ -41,9 +41,9 @@ namespace AI
         }
         public virtual void Update()
         {
-            Vector3 displacement = velocity * Time.deltaTime ;
+            Vector3 displacement = velocity * Time.deltaTime;
+            orientation += rotation * Time.deltaTime;
 
-            orientation += rotation * Time.deltaTime ;
             if (orientation < 0.0f)
                 orientation += 360.0f;
             else if (orientation > 360.0f)
@@ -60,8 +60,7 @@ namespace AI
                 steering = GetPrioritySteering();
                 groups.Clear();
             }
-
-            velocity += steering.linear * Time.deltaTime* RectionTime;
+            velocity += steering.linear * Time.deltaTime * RectionTime;
             rotation += steering.angular * Time.deltaTime * RectionTime;
 
             if (velocity.magnitude > MaxSpeed)
@@ -78,15 +77,11 @@ namespace AI
                 velocity = Vector3.zero;
             }
             steering = new Steering();
-
-            //CurSpeed = rigidBody.velocity.magnitude;
-            //SetAnimationSpeed(CurSpeed);
         }
         public Vector3 GetVelocity()
         {
             return velocity;
         }
-
 
         public void SetSteering(Steering steering, int priority)
         {

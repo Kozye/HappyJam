@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-
 namespace AI
 {
     public class Agent2D : Agent
     {
+        protected override void Start()
+        {
+            steering = new Steering();
+            groups = new Dictionary<int, List<Steering>>();
+            orientation = rotation;
+            transform.Rotate(Vector3.forward, orientation);
+        }
         public override void Update()
         {
+            Vector3 displacement = velocity * Time.deltaTime;
             orientation += rotation * Time.deltaTime;
+
             if (orientation < 0.0f)
                 orientation += 360.0f;
             else if (orientation > 360.0f)
                 orientation -= 360.0f;
-
-            Vector3 displacement = velocity * Time.deltaTime;
 
             transform.rotation = new Quaternion();
             transform.Rotate(Vector3.forward, orientation);

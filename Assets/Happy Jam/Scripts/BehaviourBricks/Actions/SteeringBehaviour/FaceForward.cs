@@ -10,19 +10,12 @@ namespace BBUnity.Actions
     [Help("Steering Behaviour Face Forward")]
     public class FaceForward : Allign
     {
-        [InParam("Use 2D")]
-        public bool Use2D = false;
+        protected float _targetOrientation = 0;
+        private IAgent _targetAgent;
 
-        private Agent _targetAgent;
         public override void OnStart()
         {
             base.OnStart();
-            if (_targetAgent == null)
-            {
-                GameObject go = new GameObject();
-                target = go.transform;
-                _targetAgent = target.gameObject.AddComponent<Agent>();
-            }
         }
 
         public override TaskStatus OnUpdate()
@@ -38,12 +31,12 @@ namespace BBUnity.Actions
             if (velocity.magnitude <= 0.0001f)
                 return new Steering();
 
-            if (Use2D)
-                _targetAgent.orientation = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
+            if (agent is Agent2D)
+                _targetOrientation = Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg;
             else
-                _targetAgent.orientation = Mathf.Atan2(velocity.x, velocity.y) * Mathf.Rad2Deg;
-            //    Debug.DrawRay(this.transform.position + Vector3.up, velocity, Color.green, 1f);
-            return base.GetSteering();
+                _targetOrientation = Mathf.Atan2(velocity.x, velocity.z) * Mathf.Rad2Deg;
+
+            return base.GetSteering(_targetOrientation, agent);
         }
     }
 }

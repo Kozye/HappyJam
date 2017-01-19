@@ -12,7 +12,7 @@ namespace BBUnity.Actions
     {
         [InParam("target")]
         [Help("Target position where the game object will be moved")]
-        public Transform target;
+        public GameObject target;
 
 
         [InParam("targetRadius")]
@@ -35,30 +35,14 @@ namespace BBUnity.Actions
 
         public override Steering GetSteering()
         {
-            Steering steering = new Steering();
-            float targetOrientation = target.GetComponent<IAgent>().GetOrientation();
-            float rotation = targetOrientation - agent.GetOrientation();
-            rotation = AgentBehaviour.MapToRange(rotation);
-            float rotationSize = Mathf.Abs(rotation);
-            if (rotationSize < targetRadius)
-            {
-                return steering;
-            }
-            float targetRotation;
-            if (rotationSize > slowRadius)
-                targetRotation = agent.GetMaxRotation();
-            else
-                targetRotation = agent.GetMaxRotation() * rotationSize / slowRadius;
-            targetRotation *= rotation / rotationSize;
-            steering.angular = targetRotation - agent.GetRotation();
-            steering.angular /= timeToTarget;
-            float angularAccel = Mathf.Abs(steering.angular);
-            if (angularAccel > agent.GetMaxAngularAccel())
-            {
-                steering.angular /= angularAccel;
-                steering.angular *= agent.GetMaxAngularAccel();
-            }
-            return steering;
+            IAgent targetAgent = target.GetComponent<IAgent>();
+            if (targetAgent != null)
+                return GetSteering(targetAgent.GetOrientation(), this.agent);
+            return null;
+        }
+        public Steering GetSteering(float targetOrientation, IAgent agent)
+        {
+            return AI.Allign.GetSteering(targetOrientation, agent, targetRadius, slowRadius, timeToTarget);
         }
     }
 }

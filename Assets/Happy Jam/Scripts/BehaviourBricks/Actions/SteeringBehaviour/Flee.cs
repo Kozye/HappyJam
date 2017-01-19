@@ -10,18 +10,13 @@ namespace BBUnity.Actions
     [Help("Steering Behaviour Flee that requires Agent component")]
     public class Flee : BaseSteeringBehaviour
     {
-        [InParam("target")]
+        [InParam("target obj")]
         [Help("Target position from which agent will flee")]
-        public Transform target;
-
-        protected Transform _target;
-        protected Transform _transform;
+        public GameObject target;
 
         public override void OnStart()
         {
             base.OnStart();
-            _target = target;
-            _transform = gameObject.transform;
         }
 
         public override TaskStatus OnUpdate()
@@ -32,19 +27,13 @@ namespace BBUnity.Actions
 
         public override Steering GetSteering()
         {
-            Steering steering = new Steering();
-            if (agent is Agent2D)
-            {
-                Debug.Log("2DAgent");
-                steering.linear = (Vector2)_transform.position - (Vector2)_target.position;
-            }
-            else
-            {
-                steering.linear = _transform.position - _target.position;
-            }
-            steering.linear.Normalize();
-            steering.linear = steering.linear * agent.GetMaxAccel();
-            return steering;
+            if (target)
+                return GetSteering(target.transform.position);
+            return null;
+        }
+        public Steering GetSteering(Vector3 position)
+        {
+            return AI.Flee.GetSteering(position, agent);
         }
     }
 }

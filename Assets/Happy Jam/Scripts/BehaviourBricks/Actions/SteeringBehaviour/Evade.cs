@@ -12,76 +12,35 @@ namespace BBUnity.Actions
         [InParam("Max Prediction")]
         public float maxPrediction;
 
-        private Transform targetAux;
-        private IAgent targetAgent;
-        //private bool isFar = false;
-        private bool _initialized = false;
+        protected Vector3 _targetPosition;
+        protected IAgent _targetAgent;
 
         public override void OnStart()
         {
             base.OnStart();
-            if (!_initialized && target != null)
-            {
-                _target = target;
-                targetAgent = _target.GetComponent<Agent>();
-                if (targetAgent == null)
-                {
-                    Debug.LogError("Target is not Agent");
-                }
-                targetAux = _target;
-                GameObject go = new GameObject();
-                _target = go.transform;
-                _initialized = true;
-            }
         }
 
         public override TaskStatus OnUpdate()
         {
-            if (_target != null)
+            if (_transform)
                 SetSteering();
             return TaskStatus.RUNNING;
         }
-        public override void OnEnd()
-        {
-            base.OnEnd();
-            End();
-        }
-        void End()
-        {
-            MonoBehaviour.Destroy(_target.gameObject);
-            targetAux = null; _initialized = false;
-        }
-        public override void OnAbort()
-        {
-            base.OnAbort();
-            End();
-        }
-
         public override Steering GetSteering()
         {
-            //isFar = false;
-            Vector3 direction = targetAux.transform.position - _transform.position;
+            if (_targetAgent == null) _targetAgent = target.GetComponent<IAgent>();
+            Vector3 direction = target.transform.position - _transform.position;
             float distance = direction.magnitude;
             float speed = agent.GetVelocity().magnitude;
             float prediction;
-            /*if (distance >= maxPrediction)
-            {
-                isFar = true;
-                Debug.Log("Far");
-            }*/
-
             if (speed <= distance / maxPrediction)
-            {
-                //Closest
                 prediction = maxPrediction;
-            }
             else
-            {
                 prediction = distance / speed;
-            }
-            _target.transform.position = targetAux.transform.position;
-            _target.transform.position += targetAgent.GetVelocity() * prediction;
-            return base.GetSteering();
+            _targetPosition = target.transform.position;
+            _targetPosition += _targetAgent.GetVelocity() * prediction;
+
+            return base.GetSteering(_targetPosition);
         }
     }
 }
